@@ -4,6 +4,7 @@
 [![Architecture](https://img.shields.io/badge/Architecture-x86%20%2F%20i686%20(32--bit)-success.svg)](https://github.com/zessdemon12-sudo/symbian-x86-loox)
 [![Base](https://img.shields.io/badge/Base-Tiny%20Core%20Linux%2015.x-orange.svg)](https://github.com/tinycorelinux)
 [![Desktop](https://img.shields.io/badge/Desktop-Symbian%20Belle%20UI-blueviolet.svg)](https://github.com/zessdemon12-sudo/symbian-x86-loox)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/zessdemon12-sudo/symbian-x86-loox/blob/main/LICENSE)
 [![Status](https://img.shields.io/badge/Status-Tested%20%26%20Verified-brightgreen.svg)](https://github.com/zessdemon12-sudo/symbian-x86-loox)
 
 **Symbian-X86 LOOX OS** is a lightweight, high-performance operating system inspired by **Symbian OS** (Belle Netbook Edition), tailored specifically for the **Fujitsu FMV-BIBLO LOOX M/G30 Netbook** (Intel Atom N450 @ 1.66 GHz, 1024x600 TFT display, 1GB RAM) and legacy 32-bit x86 netbooks and PCs.
@@ -87,6 +88,7 @@ Rebased onto **Tiny Core Linux 15.x x86**, it runs 100% in RAM via `vmlinuz` + r
 ├── tools/                    # SIS package build and signing utilities
 ├── build.sh                  # One-click master build orchestrator
 ├── make-usb.sh               # Direct physical USB flash utility
+├── LICENSE                   # MIT License
 └── PROJECT_LOG.md            # Detailed engineering log and architectural notes
 ```
 
