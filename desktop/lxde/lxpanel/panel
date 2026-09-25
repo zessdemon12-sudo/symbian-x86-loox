@@ -1,0 +1,118 @@
+# LXPanel configuration for Symbian-X86 LOOX OS
+# Mimics the clean status tray & taskbar of Symbian Belle
+
+Global {
+    edge=bottom
+    allmonitors=1
+    align=left
+    margin=0
+    widthtype=percent
+    width=100
+    height=30
+    transparent=0
+    tintcolor=#182028
+    alpha=255
+    autohide=0
+    heightwhenhidden=2
+    setdocktype=1
+    setpartialstrut=1
+    usefontcolor=1
+    fontcolor=#FFFFFF
+    background=0
+    iconsize=24
+}
+
+Plugin {
+    type=menu
+    Config {
+        image=/usr/share/icons/Symbian-Belle/symbian-menu.png
+        system {
+        }
+        separator {
+        }
+        item {
+            name=Symbian Software Center
+            image=/usr/share/icons/Symbian-Belle/apps/symbian-pkg.png
+            action=symbian-pkg-gui
+        }
+        item {
+            name=Symbian File Manager
+            image=/usr/share/icons/Symbian-Belle/apps/filemanager.png
+            action=symbian-filebrowser
+        }
+    }
+}
+
+Plugin {
+    type=launchbar
+    Config {
+        Button {
+            id=pcmanfm.desktop
+        }
+        Button {
+            id=lxterminal.desktop
+        }
+        Button {
+            id=firefox.desktop
+        }
+        Button {
+            id=vlc.desktop
+        }
+    }
+}
+
+Plugin {
+    type=space
+    Config {
+        Size=4
+    }
+}
+
+Plugin {
+    type=taskbar
+    expand=1
+    Config {
+        tooltips=1
+        IconsOnly=0
+        ShowIcon=1
+        AcceptSkipPager=1
+        ShowMinimized=1
+        ShowDeflected=1
+        ShowAllDesks=0
+        UseMouseWheel=1
+        UseUrgencyHint=1
+        FlatButton=1
+        MaxTaskWidth=180
+        spacing=2
+        GroupedTasks=0
+    }
+}
+
+Plugin {
+    type=tray
+}
+
+Plugin {
+    type=volumealsa
+}
+
+Plugin {
+    type=batt
+    Config {
+        ShowPercentage=1
+        ShowTime=1
+        AlarmTime=10
+        AlarmCommand=xmessage -center "Symbian-X86: Low Battery Warning!"
+    }
+}
+
+Plugin {
+    type=dclock
+    Config {
+        ClockFmt=%H:%M
+        TooltipFmt=%A, %d %B %Y
+        Bold=1
+        IconOnly=0
+        CenterText=1
+    }
+}

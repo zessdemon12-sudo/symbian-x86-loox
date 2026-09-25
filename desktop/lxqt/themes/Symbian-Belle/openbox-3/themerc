@@ -1,0 +1,38 @@
+# Symbian Belle Openbox Theme for LXQt
+# Optimized for Fujitsu FMV-BIBLO LOOX M/G30
+
+border.width: 1
+padding.width: 3
+padding.height: 3
+window.active.border.color: #00A8FF
+window.inactive.border.color: #2A3644
+
+# Active Titlebar
+window.active.title.bg: Gradient Vertical
+window.active.title.bg.color: #243242
+window.active.title.bg.colorTo: #141C24
+window.active.label.text.color: #FFFFFF
+window.active.label.text.font: shadow=y:shadowtint=40
+
+# Inactive Titlebar
+window.inactive.title.bg: Flat Solid
+window.inactive.title.bg.color: #16202A
+window.inactive.label.text.color: #8898A8
+
+# Window Buttons
+window.active.button.unpressed.image.color: #00A8FF
+window.active.button.hover.image.color: #FFFFFF
+window.active.button.pressed.image.color: #0088DD
+
+# Menu
+menu.border.width: 1
+menu.border.color: #00A8FF
+menu.title.bg: Flat Solid
+menu.title.bg.color: #121A22
+menu.title.text.color: #00A8FF
+menu.items.bg: Flat Solid
+menu.items.bg.color: #141C24
+menu.items.text.color: #E2E8F0
+menu.items.active.bg: Flat Solid
+menu.items.active.bg.color: #0088DD
+menu.items.active.text.color: #FFFFFF

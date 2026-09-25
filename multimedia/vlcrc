@@ -1,0 +1,26 @@
+# VLC media player configuration for Symbian-X86 LOOX OS
+# Optimized for Intel Atom N450 / Intel GMA 3150 / 1GB RAM
+
+[core]
+# Video Output Module: xvideo for direct hardware overlay
+vout=xvideo
+# Drop late frames to avoid audio/video desync on slow CPU
+drop-late-frames=1
+skip-frames=1
+
+# Audio Output: direct ALSA
+aout=alsa
+
+[avcodec]
+# Skip H.264 deblocking loop filter: reduces CPU usage on Atom N450 by up to 50%
+avcodec-skiploopfilter=4
+# Threading count matching dual-thread Atom N450 (1 core, 2 threads)
+avcodec-threads=2
+# Hardware decoding acceleration
+avcodec-hw=any
+
+[gui]
+# Disable heavy skinning and animations
+qt-privacy-ask=0
+qt-notification=0
+qt-updates-notif=0

@@ -1,0 +1,62 @@
+# Symbian Belle Openbox Theme for Symbian-X86 LOOX OS
+# Color Palette: Symbian Pure White (#FFFFFF), Deep Sky Blue (#0083D6), Metal Silver (#E8ECEF)
+
+# Window Border & Geometry
+border.width: 1
+border.color: #0070B8
+window.client.padding.width: 0
+window.client.padding.height: 0
+
+# Active Window Titlebar
+window.active.title.bg: Flat Gradient Vertical
+window.active.title.bg.color: #0092E6
+window.active.title.bg.colorTo: #0072BA
+window.active.label.text.color: #FFFFFF
+window.active.label.text.font: shadow=y:shadowcolor=#004070
+window.active.title.separator.color: #005E9C
+
+# Inactive Window Titlebar
+window.inactive.title.bg: Flat Gradient Vertical
+window.inactive.title.bg.color: #E2E6EA
+window.inactive.title.bg.colorTo: #CCD1D6
+window.inactive.label.text.color: #555E66
+window.inactive.label.text.font: shadow=n
+
+# Buttons (Close, Minimize, Maximize)
+window.active.button.unpressed.bg: Flat
+window.active.button.unpressed.bg.color: #007CBD
+window.active.button.unpressed.image.color: #FFFFFF
+
+window.active.button.pressed.bg: Flat
+window.active.button.pressed.bg.color: #005E94
+window.active.button.pressed.image.color: #FFFFFF
+
+window.active.button.hover.bg: Flat
+window.active.button.hover.bg.color: #00A6FF
+window.active.button.hover.image.color: #FFFFFF
+
+window.inactive.button.unpressed.bg: Flat
+window.inactive.button.unpressed.bg.color: #D4D8DC
+window.inactive.button.unpressed.image.color: #6C757D
+
+# Menu Styling (Symbian Context Menu)
+menu.border.width: 1
+menu.border.color: #007CBD
+menu.title.bg: Flat
+menu.title.bg.color: #007CBD
+menu.title.text.color: #FFFFFF
+menu.title.text.justify: Center
+
+menu.items.bg: Flat
+menu.items.bg.color: #FFFFFF
+menu.items.text.color: #212529
+menu.items.disabled.text.color: #868E96
+
+menu.items.active.bg: Flat
+menu.items.active.bg.color: #008BE3
+menu.items.active.text.color: #FFFFFF
+
+menu.separator.color: #E9ECEF
+menu.separator.width: 1
+menu.separator.padding.width: 6
+menu.separator.padding.height: 3

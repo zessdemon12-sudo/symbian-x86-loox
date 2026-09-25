@@ -1,0 +1,11 @@
+[Unit]
+Description=Symbian-X86 LOOX M/G30 Hardware & Power Optimization
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/symbian/bin/loox-power-opt.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

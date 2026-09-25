@@ -1,0 +1,66 @@
+# Symbian-X86 LOOX OS - Package List (i686 / 32-bit x86)
+# Optimized for Intel Atom N450 / 1GB RAM
+
+# Core Linux System
+linux-image-686
+initramfs-tools
+live-boot
+systemd-sysv
+grub-pc-bin
+grub-common
+e2fsprogs
+dosfstools
+parted
+sudo
+acpid
+acpi-support-base
+cpufrequtils
+zram-tools
+
+# X11 & Graphics (Intel GMA 3150)
+xorg
+xserver-xorg-video-intel
+xserver-xorg-core
+x11-xserver-utils
+xinit
+mesa-va-drivers
+libgl1-mesa-dri
+
+# Desktop Environment (LXDE Lightweight)
+lxde-core
+lxsession
+openbox
+lxpanel
+pcmanfm
+lxappearance
+lxterminal
+lightdm
+lightdm-gtk-greeter
+
+# Networking
+network-manager
+network-manager-gnome
+wireless-tools
+wpasupplicant
+rfkill
+curl
+wget
+
+# Audio & Multimedia
+alsa-utils
+pulseaudio
+pulseaudio-utils
+pavucontrol
+vlc
+ffmpeg
+
+# Default Applications
+firefox-esr
+mousepad
+gpicview
+qpdfview
+
+# Python Runtime & Libraries (Symbian Subsystem)
+python3
+python3-tk
+python3-pil

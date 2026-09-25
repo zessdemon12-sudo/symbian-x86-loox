@@ -1,0 +1,36 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Temporary and build staging directories
+output/*.img
+output/*.iso
+output/*.bin
+output/boot/core.gz
+output/boot/initrd.img
+output/boot/vmlinuz
+output/iso_staging/
+output/rootfs_staging/
+output/live/
+scripts/remaster_staging/
+
+# Upstream binaries and downloaded caches
+kernel/i686/*.deb
+kernel/i686/*.tar.*
+kernel/i686/control.tar.xz
+kernel/i686/data.tar.xz
+kernel/i686/debian-binary
+kernel/i686/kernel_deb/
+kernel/i686/initramfs_staging/
+kernel/tinycore/TinyCore-*.iso
+kernel/tinycore/core.gz
+kernel/tinycore/modules.gz
+kernel/tinycore/vmlinuz
+kernel/tinycore/tcz/
+
+# Logs, sockets, and temporary test files
+*.log
+*.sock
+*.ppm
+.DS_Store

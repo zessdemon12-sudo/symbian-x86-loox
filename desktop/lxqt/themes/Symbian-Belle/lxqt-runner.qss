@@ -1,0 +1,28 @@
+/* Symbian Belle App Runner */
+#RunnerWindow {
+    background: rgba(18, 25, 33, 245);
+    border: 2px solid #00A8FF;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+QLineEdit {
+    background: rgba(30, 42, 54, 220);
+    color: #FFFFFF;
+    border: 1px solid #00A8FF;
+    border-radius: 5px;
+    padding: 6px 10px;
+    font-size: 13px;
+}
+
+QListView {
+    background: transparent;
+    color: #E0E8F0;
+    border: none;
+}
+
+QListView::item:selected {
+    background: #0088DD;
+    color: #FFFFFF;
+    border-radius: 4px;
+}

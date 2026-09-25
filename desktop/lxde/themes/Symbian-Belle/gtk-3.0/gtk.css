@@ -1,0 +1,65 @@
+/* Symbian Belle GTK 3.0 CSS for Symbian-X86 LOOX OS */
+
+@define-color symbian_blue #008BE3;
+@define-color symbian_dark_blue #006FB8;
+@define-color symbian_bg #F4F6F8;
+@define-color symbian_fg #1E2328;
+@define-color symbian_panel #182028;
+
+* {
+    font-family: "DejaVu Sans", "Noto Sans", sans-serif;
+    font-size: 10pt;
+}
+
+window {
+    background-color: @symbian_bg;
+    color: @symbian_fg;
+}
+
+button {
+    background: linear-gradient(to bottom, #FFFFFF, #E6EAEF);
+    border: 1px solid #B0B8C0;
+    border-radius: 4px;
+    padding: 4px 8px;
+    color: @symbian_fg;
+}
+
+button:hover {
+    background: linear-gradient(to bottom, #FFFFFF, #D5E8F8);
+    border-color: @symbian_blue;
+    color: @symbian_dark_blue;
+}
+
+button:active {
+    background: @symbian_blue;
+    color: #FFFFFF;
+}
+
+entry {
+    background-color: #FFFFFF;
+    border: 1px solid #B0B8C0;
+    border-radius: 3px;
+    padding: 4px;
+    color: @symbian_fg;
+}
+
+entry:focus {
+    border-color: @symbian_blue;
+    box-shadow: 0 0 2px @symbian_blue;
+}
+
+headerbar {
+    background: linear-gradient(to bottom, #0092E6, #0072BA);
+    color: #FFFFFF;
+    border-bottom: 1px solid #005E9C;
+}
+
+/* Scrollbars */
+scrollbar slider {
+    background-color: #B0B8C0;
+    border-radius: 3px;
+}
+
+scrollbar slider:hover {
+    background-color: @symbian_blue;
+}

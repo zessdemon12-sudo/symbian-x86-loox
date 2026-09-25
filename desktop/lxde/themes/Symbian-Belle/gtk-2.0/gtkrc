@@ -1,0 +1,64 @@
+# Symbian Belle GTK 2.0 Theme for Symbian-X86 LOOX OS
+
+gtk-color-scheme = "bg_color:#F4F6F8\nfg_color:#22262A\nbase_color:#FFFFFF\ntext_color:#1A1D20\nselected_bg_color:#008BE3\nselected_fg_color:#FFFFFF\ntooltip_bg_color:#283038\ntooltip_fg_color:#FFFFFF"
+
+style "default" {
+    GtkWidget::focus-line-width = 1
+    GtkWidget::focus-padding = 1
+    GtkButton::default-border = { 2, 2, 2, 2 }
+    GtkButton::default-outside-border = { 0, 0, 0, 0 }
+    GtkRange::slider-width = 14
+    GtkRange::stepper-size = 14
+    GtkScrollbar::min-slider-length = 24
+
+    xthickness = 2
+    ythickness = 2
+
+    bg[NORMAL]        = @bg_color
+    bg[PRELIGHT]      = shade (1.05, @bg_color)
+    bg[ACTIVE]        = shade (0.90, @bg_color)
+    bg[SELECTED]      = @selected_bg_color
+    bg[INSENSITIVE]   = shade (0.95, @bg_color)
+
+    fg[NORMAL]        = @fg_color
+    fg[PRELIGHT]      = @fg_color
+    fg[ACTIVE]        = @fg_color
+    fg[SELECTED]      = @selected_fg_color
+    fg[INSENSITIVE]   = shade (0.60, @bg_color)
+
+    base[NORMAL]      = @base_color
+    base[PRELIGHT]    = @base_color
+    base[ACTIVE]      = @selected_bg_color
+    base[SELECTED]    = @selected_bg_color
+    base[INSENSITIVE] = shade (0.95, @bg_color)
+
+    text[NORMAL]      = @text_color
+    text[PRELIGHT]    = @text_color
+    text[ACTIVE]      = @selected_fg_color
+    text[SELECTED]    = @selected_fg_color
+    text[INSENSITIVE] = shade (0.50, @bg_color)
+}
+
+style "button" = "default" {
+    xthickness = 4
+    ythickness = 3
+    bg[NORMAL]   = shade (0.97, @bg_color)
+    bg[PRELIGHT] = shade (1.08, @bg_color)
+    bg[ACTIVE]   = shade (0.85, @bg_color)
+}
+
+style "panel" = "default" {
+    xthickness = 1
+    ythickness = 1
+    bg[NORMAL]   = "#1C242C"
+    bg[PRELIGHT] = "#008BE3"
+    bg[ACTIVE]   = "#006FA8"
+    fg[NORMAL]   = "#FFFFFF"
+    fg[PRELIGHT] = "#FFFFFF"
+    fg[ACTIVE]   = "#FFFFFF"
+}
+
+class "GtkWidget" style "default"
+class "GtkButton" style "button"
+widget "*Panel*" style "panel"
+widget "*lxpanel*" style "panel"

@@ -1,0 +1,24 @@
+/* Symbian Belle Notification OSD */
+#Notification {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 rgba(24, 34, 46, 245), stop:1 rgba(14, 20, 28, 250));
+    border: 1px solid #00A8FF;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+#appLabel {
+    color: #00A8FF;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+#summaryLabel {
+    color: #FFFFFF;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+#bodyLabel {
+    color: #D0DCE8;
+    font-size: 11px;
+}
