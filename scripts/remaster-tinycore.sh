@@ -100,9 +100,10 @@ ln -sf /usr/local/bin/python3.9 "$STAGING/usr/bin/python"
 ln -sf /usr/local/bin/python3.9 "$STAGING/usr/local/bin/python3"
 ln -sf /usr/local/bin/python3.9 "$STAGING/usr/local/bin/python"
 [ -f "$STAGING/usr/local/bin/openbox" ] && ln -sf /usr/local/bin/openbox "$STAGING/usr/bin/openbox"
-for app in dillo leafpad gpicview flaxpdf lxtask htop lxterminal lxappearance lxrandr fluff flcalc flviewer flburn aterm; do
+for app in dillo leafpad gpicview flaxpdf lxtask htop lxterminal lxappearance lxrandr fluff flcalc flviewer flburn aterm network ezremaster wifi.sh; do
     [ -f "$STAGING/usr/local/bin/$app" ] && ln -sf "/usr/local/bin/$app" "$STAGING/usr/bin/$app" 2>/dev/null || true
 done
+[ -f "$STAGING/usr/local/sbin/ndiswrapper" ] && ln -sf /usr/local/sbin/ndiswrapper "$STAGING/usr/bin/ndiswrapper" 2>/dev/null || true
 
 # Install TrueType fonts for GUI & Tkinter
 mkdir -p "$STAGING/usr/share/fonts/truetype/dejavu" "$STAGING/usr/local/share/fonts" "$STAGING/etc/fonts"
@@ -128,7 +129,11 @@ cp "$BASE_DIR/applications/calculator/calculator.py" "$STAGING/usr/bin/symbian-c
 cp "$BASE_DIR/applications/filebrowser/filebrowser.py" "$STAGING/usr/bin/symbian-filebrowser" 2>/dev/null || true
 cp "$BASE_DIR/applications/pkgmanager/appmanager.py" "$STAGING/usr/bin/symbian-appmanager" 2>/dev/null || true
 cp "$BASE_DIR/installer/loox-installer-gui.py" "$STAGING/usr/bin/symbian-installer" 2>/dev/null || true
-chmod +x "$STAGING/usr/bin/symbian-notes" "$STAGING/usr/bin/symbian-calc" "$STAGING/usr/bin/symbian-filebrowser" "$STAGING/usr/bin/symbian-appmanager" "$STAGING/usr/bin/symbian-installer" 2>/dev/null || true
+cp "$BASE_DIR/applications/network/symbian-network-gui.py" "$STAGING/usr/bin/symbian-network" 2>/dev/null || true
+cp "$BASE_DIR/applications/network/symbian-ndiswrapper-gui.py" "$STAGING/usr/bin/symbian-ndiswrapper" 2>/dev/null || true
+cp "$BASE_DIR/applications/settings/symbian-keyboard-gui.py" "$STAGING/usr/bin/symbian-keyboard" 2>/dev/null || true
+cp "$BASE_DIR/applications/remaster/symbian-remaster-gui.py" "$STAGING/usr/bin/symbian-remaster" 2>/dev/null || true
+chmod +x "$STAGING/usr/bin/symbian-notes" "$STAGING/usr/bin/symbian-calc" "$STAGING/usr/bin/symbian-filebrowser" "$STAGING/usr/bin/symbian-appmanager" "$STAGING/usr/bin/symbian-installer" "$STAGING/usr/bin/symbian-network" "$STAGING/usr/bin/symbian-ndiswrapper" "$STAGING/usr/bin/symbian-keyboard" "$STAGING/usr/bin/symbian-remaster" 2>/dev/null || true
 
 # Copy sample packages
 cp -r "$BASE_DIR/packages"/* "$STAGING/opt/symbian/packages/" 2>/dev/null || true
@@ -289,6 +294,50 @@ Terminal=false
 Categories=Settings;DesktopSettings;
 EOF
 
+cat <<EOF > "$STAGING/usr/share/applications/symbian-network.desktop"
+[Desktop Entry]
+Type=Application
+Name=Network & Wi-Fi
+Comment=Wired and Wireless Network Manager
+Exec=symbian-network
+Icon=/usr/share/icons/Symbian-Belle/apps/network.png
+Terminal=false
+Categories=Network;Settings;
+EOF
+
+cat <<EOF > "$STAGING/usr/share/applications/symbian-keyboard.desktop"
+[Desktop Entry]
+Type=Application
+Name=Keyboard Settings
+Comment=International Non-US Keyboard Layout Switcher
+Exec=symbian-keyboard
+Icon=/usr/share/icons/Symbian-Belle/apps/keyboard.png
+Terminal=false
+Categories=Settings;
+EOF
+
+cat <<EOF > "$STAGING/usr/share/applications/symbian-remaster.desktop"
+[Desktop Entry]
+Type=Application
+Name=Remaster OS
+Comment=Symbian-X86 OS Remastering & Backup Assistant
+Exec=symbian-remaster
+Icon=/usr/share/icons/Symbian-Belle/apps/remaster.png
+Terminal=false
+Categories=System;
+EOF
+
+cat <<EOF > "$STAGING/usr/share/applications/symbian-ndiswrapper.desktop"
+[Desktop Entry]
+Type=Application
+Name=Windows WiFi Drivers
+Comment=Windows NDIS Wireless Driver Manager
+Exec=symbian-ndiswrapper
+Icon=/usr/share/icons/Symbian-Belle/apps/ndiswrapper.png
+Terminal=false
+Categories=Network;Settings;
+EOF
+
 cp "$STAGING/usr/share/applications/symbian-"*.desktop "$STAGING/etc/skel/Desktop/" 2>/dev/null || true
 
 # 7. Hardware, Audio & Netbook Power Optimizations
@@ -298,6 +347,21 @@ cp "$BASE_DIR/drivers/power/loox-power-opt.sh" "$STAGING/opt/symbian/bin/" 2>/de
 chmod +x "$STAGING/opt/symbian/bin/loox-power-opt.sh" 2>/dev/null || true
 cp "$BASE_DIR/drivers/graphics/20-intel.conf" "$STAGING/etc/X11/xorg.conf.d/" 2>/dev/null || true
 cp "$BASE_DIR/drivers/audio/asound.state" "$STAGING/var/lib/alsa/" 2>/dev/null || true
+
+# Firmware symlink so kernel drivers and udev load all wireless/NIC firmware seamlessly
+mkdir -p "$STAGING/usr/local/lib/firmware" "$STAGING/lib" "$STAGING/usr/local/bin"
+ln -sfn /usr/local/lib/firmware "$STAGING/lib/firmware"
+ln -sf /usr/local/sbin/ndiswrapper "$STAGING/usr/local/bin/ndiswrapper" 2>/dev/null || true
+
+# Ensure all wired ethernet interfaces (eth*, en*, usb*) auto-DHCP on boot
+if [ -f "$STAGING/etc/init.d/dhcp.sh" ]; then
+    sed -i 's|/eth.:|/(eth\|en\|usb).*:|' "$STAGING/etc/init.d/dhcp.sh"
+fi
+
+# Ensure /etc/profile includes /usr/local/sbin in PATH for all users
+if [ -f "$STAGING/etc/profile" ]; then
+    sed -i 's|PATH="/usr/local/bin:|PATH="/usr/local/bin:/usr/local/sbin:|g' "$STAGING/etc/profile"
+fi
 
 # Symbian OS Release Identification
 cat <<EOF > "$STAGING/etc/os-release"
@@ -417,6 +481,18 @@ t: Package Manager
 i: /usr/share/icons/Symbian-Belle/apps/sysmanager.png
 c: symbian-installer
 t: Install to HDD
+
+i: /usr/share/icons/Symbian-Belle/apps/network.png
+c: symbian-network
+t: Network & Wi-Fi
+
+i: /usr/share/icons/Symbian-Belle/apps/keyboard.png
+c: symbian-keyboard
+t: Keyboard
+
+i: /usr/share/icons/Symbian-Belle/apps/remaster.png
+c: symbian-remaster
+t: Remaster OS
 EOF
 mkdir -p "$STAGING/usr/share/wbar" "$STAGING/etc/skel"
 cp "$STAGING/usr/local/etc/wbar.cfg" "$STAGING/usr/share/wbar/dot.wbar" 2>/dev/null || true
@@ -425,7 +501,7 @@ cp "$STAGING/usr/local/etc/wbar.cfg" "$STAGING/etc/skel/.wbar" 2>/dev/null || tr
 # Configure .xsession for user tc
 cat <<'EOF' > "$STAGING/etc/skel/.xsession"
 #!/bin/sh
-export PATH=/home/tc/.local/bin:/usr/local/bin:/usr/bin:/bin:/opt/symbian/bin:$PATH
+export PATH=/home/tc/.local/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:/opt/symbian/bin:$PATH
 export PYTHONPATH=/opt:$PYTHONPATH
 export LD_LIBRARY_PATH=/usr/local/lib:/opt/symbian/lib:$LD_LIBRARY_PATH
 export DISPLAY=:0.0
@@ -518,7 +594,7 @@ chmod 755 "$STAGING/etc/skel/.xsession"
 cat <<'EOF' > "$STAGING/etc/skel/.profile"
 # ~/.profile: Executed by Bourne-compatible login shells.
 [ -d "$HOME/.local/bin" ] || mkdir -p "$HOME/.local/bin"
-export PATH=$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:/opt/symbian/bin:$PATH
+export PATH=$HOME/.local/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:/opt/symbian/bin:$PATH
 export PYTHONPATH=/opt:$PYTHONPATH
 export LD_LIBRARY_PATH=/usr/local/lib:/opt/symbian/lib:$LD_LIBRARY_PATH
 

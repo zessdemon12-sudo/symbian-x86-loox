@@ -20,9 +20,9 @@ echo "=========================================================="
 
 rm -f "$USB_IMG" "$PART_IMG"
 
-# 1. Create a 255 MiB FAT32 partition image
-echo "[1/6] Formatting FAT32 filesystem (255 MiB)..."
-truncate -s 255M "$PART_IMG"
+# 1. Create a 768 MiB FAT32 partition image (accommodates full firmware & applications)
+echo "[1/6] Formatting FAT32 filesystem (768 MiB)..."
+truncate -s 768M "$PART_IMG"
 mkfs.vfat -F 32 -n "SYMBIAN_X86" "$PART_IMG"
 
 # 2. Copy ALL Syslinux BIOS bootloader modules
@@ -40,7 +40,7 @@ for mod in /usr/lib/syslinux/modules/bios/*.c32; do
     fi
 done
 
-# 3. Create syslinux.cfg boot menu with bulletproof fallback entries
+# 3. Create syslinux.cfg boot menu with bulletproof fallback entries & Non-US Keyboards
 cat <<'EOF' > /tmp/syslinux.cfg
 SERIAL 0 115200
 UI menu.c32
@@ -55,36 +55,55 @@ MENU COLOR sel          7;37;40 #e0ffffff #20ffffff all
 MENU COLOR unsel        37;44   #50ffffff #a0000000 std
 
 LABEL live
-  MENU LABEL ^1. Symbian-X86 LOOX OS (Tiny Core RAM Desktop - Auto KMS)
+  MENU LABEL ^1. Symbian-X86 LOOX OS (Tiny Core RAM Desktop - US Keyboard)
   LINUX /boot/vmlinuz
   INITRD /boot/core.gz
   APPEND loglevel=3 quiet waitusb=5 loop.max_loop=256 console=ttyS0,115200 console=tty0
 
+LABEL uk
+  MENU LABEL ^2. Symbian-X86 LOOX OS (UK English Keyboard)
+  LINUX /boot/vmlinuz
+  INITRD /boot/core.gz
+  APPEND loglevel=3 quiet waitusb=5 loop.max_loop=256 kmap=qwerty/uk console=ttyS0,115200 console=tty0
+
+LABEL fr
+  MENU LABEL ^3. Symbian-X86 LOOX OS (French AZERTY Keyboard)
+  LINUX /boot/vmlinuz
+  INITRD /boot/core.gz
+  APPEND loglevel=3 quiet waitusb=5 loop.max_loop=256 kmap=azerty/fr console=ttyS0,115200 console=tty0
+
+LABEL de
+  MENU LABEL ^4. Symbian-X86 LOOX OS (German QWERTZ Keyboard)
+  LINUX /boot/vmlinuz
+  INITRD /boot/core.gz
+  APPEND loglevel=3 quiet waitusb=5 loop.max_loop=256 kmap=qwertz/de console=ttyS0,115200 console=tty0
+
+LABEL es
+  MENU LABEL ^5. Symbian-X86 LOOX OS (Spanish Keyboard)
+  LINUX /boot/vmlinuz
+  INITRD /boot/core.gz
+  APPEND loglevel=3 quiet waitusb=5 loop.max_loop=256 kmap=qwerty/es console=ttyS0,115200 console=tty0
+
+LABEL jp
+  MENU LABEL ^6. Symbian-X86 LOOX OS (Japanese JP106 Keyboard)
+  LINUX /boot/vmlinuz
+  INITRD /boot/core.gz
+  APPEND loglevel=3 quiet waitusb=5 loop.max_loop=256 kmap=qwerty/jp106 console=ttyS0,115200 console=tty0
+
 LABEL vesa
-  MENU LABEL ^2. Symbian-X86 LOOX OS (Safe Graphics - nomodeset/VESA)
+  MENU LABEL ^7. Safe Graphics (nomodeset/VESA)
   LINUX /boot/vmlinuz
   INITRD /boot/core.gz
   APPEND loglevel=3 quiet waitusb=5 loop.max_loop=256 xvesa=1024x600x16 nomodeset console=ttyS0,115200 console=tty0
 
-LABEL directroot
-  MENU LABEL ^3. Symbian-X86 LOOX OS (Direct Root /vmlinuz)
-  LINUX /vmlinuz
-  INITRD /core.gz
-  APPEND loglevel=3 quiet waitusb=5 loop.max_loop=256 console=ttyS0,115200 console=tty0
-
-LABEL kernelmod
-  MENU LABEL ^4. Symbian-X86 LOOX OS (KERNEL Direct Mode)
-  KERNEL /boot/vmlinuz
-  APPEND initrd=/boot/core.gz loglevel=3 quiet waitusb=5 loop.max_loop=256 console=ttyS0,115200 console=tty0
-
 LABEL install
-  MENU LABEL ^5. Install Symbian-X86 to Internal HDD/SSD
+  MENU LABEL ^8. Install Symbian-X86 to Internal HDD/SSD
   LINUX /boot/vmlinuz
   INITRD /boot/core.gz
   APPEND loglevel=3 quiet waitusb=5 loop.max_loop=256 symbian_installer=1 console=ttyS0,115200 console=tty0
 
 LABEL debug
-  MENU LABEL ^6. Symbian-X86 LOOX OS (Verbose Console & Debug Shell)
+  MENU LABEL ^9. Verbose Console & Debug Shell
   LINUX /boot/vmlinuz
   INITRD /boot/core.gz
   APPEND loglevel=7 debug waitusb=5 loop.max_loop=256 showapps text console=ttyS0,115200 console=tty0
@@ -109,17 +128,13 @@ if [ -d "$BASE_DIR/kernel/tinycore/tcz_apps" ]; then
     echo "[3.5/6] Staging regular TCZ application packages..."
     mmd -i "$PART_IMG" ::tce 2>/dev/null || true
     mmd -i "$PART_IMG" ::tce/optional 2>/dev/null || true
-    mmd -i "$PART_IMG" ::cde 2>/dev/null || true
-    mmd -i "$PART_IMG" ::cde/optional 2>/dev/null || true
     
     [ -f "$BASE_DIR/kernel/tinycore/tcz_apps/onboot.lst" ] && mcopy -o -i "$PART_IMG" "$BASE_DIR/kernel/tinycore/tcz_apps/onboot.lst" ::tce/onboot.lst
-    [ -f "$BASE_DIR/kernel/tinycore/tcz_apps/onboot.lst" ] && mcopy -o -i "$PART_IMG" "$BASE_DIR/kernel/tinycore/tcz_apps/onboot.lst" ::cde/onboot.lst
     
     for f in "$BASE_DIR/kernel/tinycore/tcz_apps"/*; do
         if [ -f "$f" ]; then
             fname=$(basename "$f")
             mcopy -o -i "$PART_IMG" "$f" "::tce/optional/$fname" 2>/dev/null || true
-            mcopy -o -i "$PART_IMG" "$f" "::cde/optional/$fname" 2>/dev/null || true
         fi
     done
 fi
