@@ -28,6 +28,11 @@ kernel/tinycore/core.gz
 kernel/tinycore/modules.gz
 kernel/tinycore/vmlinuz
 kernel/tinycore/tcz/
+kernel/tinycore/tcz_apps/*.tcz*
+kernel/tinycore/tcz_apps/*.dep
+kernel/tinycore/tcz_base/*.tcz*
+kernel/tinycore/tcz_base/*.dep
+!kernel/tinycore/tcz_apps/onboot.lst
 
 # Logs, sockets, and temporary test files
 *.log

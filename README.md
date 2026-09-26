@@ -41,7 +41,16 @@ Rebased onto **Tiny Core Linux 15.x x86**, it runs 100% in RAM via `vmlinuz` + r
   - `C:` -> User Home (`/home/tc`)
   - `D:` -> Removable Storage (`/media`)
   - `Z:` -> Symbian ROM (`/opt/symbian/rom`)
-- **Native Symbian Applications:**
+- **Standard Desktop Applications (TCZ Extensions):**
+  - **Dillo Web Browser** (`dillo`): Fast, low-memory web browser for lightweight internet browsing.
+  - **Leafpad Text Editor** (`leafpad`): Full GTK2 graphical notepad.
+  - **GPicView Image Viewer** (`gpicview`): Responsive image viewer with zoom/rotation.
+  - **FlaxPDF Document Reader** (`flaxpdf`): PDF reader optimized for low-spec netbooks.
+  - **LXTask Task Manager** (`lxtask`): Process, CPU, and RAM usage monitor.
+  - **LXTerminal** (`lxterminal`): Tabbed terminal emulator.
+  - **LXAppearance & LXRandr**: GTK theme, font, and display resolution settings.
+  - **Fluff File Manager & Flcalc**: Fast graphical file browser and scientific calculator.
+- **Native Symbian Applications & Compatibility Layer:**
   - **Symbian Notes** (`symbian-notes`): Lightweight text editor with C:/D: storage.
   - **Symbian Calculator** (`symbian-calc`): Clean scientific/standard calculator.
   - **Symbian File Browser** (`symbian-filebrowser`): Symbian drive manager for C:, D:, Z:.

@@ -20,9 +20,9 @@ echo "=========================================================="
 
 rm -f "$USB_IMG" "$PART_IMG"
 
-# 1. Create a 127 MiB FAT32 partition image
-echo "[1/6] Formatting FAT32 filesystem (127 MiB)..."
-truncate -s 127M "$PART_IMG"
+# 1. Create a 255 MiB FAT32 partition image
+echo "[1/6] Formatting FAT32 filesystem (255 MiB)..."
+truncate -s 255M "$PART_IMG"
 mkfs.vfat -F 32 -n "SYMBIAN_X86" "$PART_IMG"
 
 # 2. Copy ALL Syslinux BIOS bootloader modules
@@ -58,7 +58,7 @@ LABEL live
   MENU LABEL ^1. Symbian-X86 LOOX OS (Tiny Core RAM Desktop - Auto KMS)
   LINUX /boot/vmlinuz
   INITRD /boot/core.gz
-  APPEND loglevel=3 quiet waitusb=5 tce=c1 console=ttyS0,115200 console=tty0
+  APPEND loglevel=3 quiet waitusb=5 cde console=ttyS0,115200 console=tty0
 
 LABEL vesa
   MENU LABEL ^2. Symbian-X86 LOOX OS (Safe Graphics - nomodeset/VESA)
@@ -103,6 +103,26 @@ mcopy -o -i "$PART_IMG" "$OUTPUT_DIR/boot/core.gz" ::boot/core.gz
 # Also copy to root of drive as fallback
 mcopy -o -i "$PART_IMG" "$OUTPUT_DIR/boot/vmlinuz" ::vmlinuz
 mcopy -o -i "$PART_IMG" "$OUTPUT_DIR/boot/core.gz" ::core.gz
+
+# 4.5 Copy regular TCZ application packages and onboot.lst
+if [ -d "$BASE_DIR/kernel/tinycore/tcz_apps" ]; then
+    echo "[3.5/6] Staging regular TCZ application packages..."
+    mmd -i "$PART_IMG" ::tce 2>/dev/null || true
+    mmd -i "$PART_IMG" ::tce/optional 2>/dev/null || true
+    mmd -i "$PART_IMG" ::cde 2>/dev/null || true
+    mmd -i "$PART_IMG" ::cde/optional 2>/dev/null || true
+    
+    [ -f "$BASE_DIR/kernel/tinycore/tcz_apps/onboot.lst" ] && mcopy -o -i "$PART_IMG" "$BASE_DIR/kernel/tinycore/tcz_apps/onboot.lst" ::tce/onboot.lst
+    [ -f "$BASE_DIR/kernel/tinycore/tcz_apps/onboot.lst" ] && mcopy -o -i "$PART_IMG" "$BASE_DIR/kernel/tinycore/tcz_apps/onboot.lst" ::cde/onboot.lst
+    
+    for f in "$BASE_DIR/kernel/tinycore/tcz_apps"/*; do
+        if [ -f "$f" ]; then
+            fname=$(basename "$f")
+            mcopy -o -i "$PART_IMG" "$f" "::tce/optional/$fname" 2>/dev/null || true
+            mcopy -o -i "$PART_IMG" "$f" "::cde/optional/$fname" 2>/dev/null || true
+        fi
+    done
+fi
 
 # 5. Install Syslinux boot record to partition
 echo "[4/6] Installing Syslinux Volume Boot Record..."

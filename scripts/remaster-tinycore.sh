@@ -33,6 +33,7 @@ fi
 
 # 1. Clean Staging Area
 echo "[1/9] Unpacking Tiny Core Linux core.gz rootfs..."
+chmod -R u+w "$STAGING" 2>/dev/null || true
 rm -rf "$STAGING"
 mkdir -p "$STAGING"
 
@@ -64,7 +65,7 @@ done
 
 # 4. Unpack Python 3.9, Tkinter, Openbox, and Intel Drivers
 echo "[4/9] Integrating Python 3.9, Tkinter, Openbox, and Intel graphics..."
-for tcz in "$KERNEL_DIR/tcz"/*.tcz; do
+for tcz in "$KERNEL_DIR/tcz_base"/*.tcz; do
     if [ -f "$tcz" ]; then
         unsquashfs -f -d "$STAGING" "$tcz" >/dev/null 2>&1 || true
     fi
@@ -79,13 +80,16 @@ fi
 mkdir -p "$STAGING/usr/local/lib/python3.9/site-packages"
 echo "/opt" > "$STAGING/usr/local/lib/python3.9/site-packages/symbian.pth"
 
-# Create python3 and openbox symlinks
+# Create application symlinks
 mkdir -p "$STAGING/usr/bin" "$STAGING/usr/local/bin"
 ln -sf /usr/local/bin/python3.9 "$STAGING/usr/bin/python3"
 ln -sf /usr/local/bin/python3.9 "$STAGING/usr/bin/python"
 ln -sf /usr/local/bin/python3.9 "$STAGING/usr/local/bin/python3"
 ln -sf /usr/local/bin/python3.9 "$STAGING/usr/local/bin/python"
 [ -f "$STAGING/usr/local/bin/openbox" ] && ln -sf /usr/local/bin/openbox "$STAGING/usr/bin/openbox"
+for app in dillo leafpad gpicview flaxpdf lxtask htop lxterminal lxappearance lxrandr fluff flcalc flviewer flburn aterm; do
+    [ -f "$STAGING/usr/local/bin/$app" ] && ln -sf "/usr/local/bin/$app" "$STAGING/usr/bin/$app" 2>/dev/null || true
+done
 
 # Install TrueType fonts for GUI & Tkinter
 mkdir -p "$STAGING/usr/share/fonts/truetype/dejavu" "$STAGING/usr/local/share/fonts" "$STAGING/etc/fonts"
@@ -195,6 +199,83 @@ Terminal=false
 Categories=System;
 EOF
 
+cat <<EOF > "$STAGING/usr/share/applications/symbian-browser.desktop"
+[Desktop Entry]
+Type=Application
+Name=Web Browser (Dillo)
+Comment=Fast, Lightweight Web Browser
+Exec=dillo
+Icon=/usr/share/icons/Symbian-Belle/apps/browser.png
+Terminal=false
+Categories=Network;WebBrowser;
+EOF
+
+cat <<EOF > "$STAGING/usr/share/applications/symbian-leafpad.desktop"
+[Desktop Entry]
+Type=Application
+Name=Leafpad Text Editor
+Comment=Simple, Lightweight Text Editor
+Exec=leafpad
+Icon=/usr/share/icons/Symbian-Belle/apps/leafpad.png
+Terminal=false
+Categories=Utility;TextEditor;
+EOF
+
+cat <<EOF > "$STAGING/usr/share/applications/symbian-imageviewer.desktop"
+[Desktop Entry]
+Type=Application
+Name=Image Viewer (GPicView)
+Comment=Lightweight Fast Image Viewer
+Exec=gpicview
+Icon=/usr/share/icons/Symbian-Belle/apps/gpicview.png
+Terminal=false
+Categories=Graphics;Viewer;
+EOF
+
+cat <<EOF > "$STAGING/usr/share/applications/symbian-pdf.desktop"
+[Desktop Entry]
+Type=Application
+Name=PDF Reader (FlaxPDF)
+Comment=Lightweight Fast PDF Document Viewer
+Exec=flaxpdf
+Icon=/usr/share/icons/Symbian-Belle/apps/pdf.png
+Terminal=false
+Categories=Office;Viewer;
+EOF
+
+cat <<EOF > "$STAGING/usr/share/applications/symbian-terminal.desktop"
+[Desktop Entry]
+Type=Application
+Name=Terminal Emulator
+Comment=Command Line Terminal
+Exec=lxterminal
+Icon=/usr/share/icons/Symbian-Belle/apps/terminal.png
+Terminal=false
+Categories=System;TerminalEmulator;
+EOF
+
+cat <<EOF > "$STAGING/usr/share/applications/symbian-taskmanager.desktop"
+[Desktop Entry]
+Type=Application
+Name=Task Manager (LXTask)
+Comment=Resource and Process Monitor
+Exec=lxtask
+Icon=/usr/share/icons/Symbian-Belle/apps/taskmanager.png
+Terminal=false
+Categories=System;Monitor;
+EOF
+
+cat <<EOF > "$STAGING/usr/share/applications/symbian-appearance.desktop"
+[Desktop Entry]
+Type=Application
+Name=Appearance Settings
+Comment=Configure GTK Themes and Icons
+Exec=lxappearance
+Icon=/usr/share/icons/Symbian-Belle/apps/settings.png
+Terminal=false
+Categories=Settings;DesktopSettings;
+EOF
+
 cp "$STAGING/usr/share/applications/symbian-"*.desktop "$STAGING/etc/skel/Desktop/" 2>/dev/null || true
 
 # 7. Hardware, Audio & Netbook Power Optimizations
@@ -280,9 +361,17 @@ i: /usr/share/icons/Symbian-Belle/symbian-menu.png
 c: symbian-appmanager
 t: Symbian Apps
 
+i: /usr/share/icons/Symbian-Belle/apps/browser.png
+c: dillo
+t: Web Browser
+
+i: /usr/share/icons/Symbian-Belle/apps/leafpad.png
+c: leafpad
+t: Text Editor
+
 i: /usr/share/icons/Symbian-Belle/apps/notes.png
 c: symbian-notes
-t: Notes
+t: Symbian Notes
 
 i: /usr/share/icons/Symbian-Belle/apps/calculator.png
 c: symbian-calc
@@ -291,6 +380,22 @@ t: Calculator
 i: /usr/share/icons/Symbian-Belle/apps/filemanager.png
 c: symbian-filebrowser
 t: File Browser (C:, D:, Z:)
+
+i: /usr/share/icons/Symbian-Belle/apps/gpicview.png
+c: gpicview
+t: Image Viewer
+
+i: /usr/share/icons/Symbian-Belle/apps/pdf.png
+c: flaxpdf
+t: PDF Reader
+
+i: /usr/share/icons/Symbian-Belle/apps/taskmanager.png
+c: lxtask
+t: Task Manager
+
+i: /usr/share/icons/Symbian-Belle/apps/terminal.png
+c: lxterminal
+t: Terminal
 
 i: /usr/share/icons/Symbian-Belle/apps/symbian-pkg.png
 c: symbian-pkg-gui
@@ -352,12 +457,41 @@ if [ -x /usr/local/bin/wbar ]; then
     (sleep 1 && wbar --bpress --above-desk --pos bottom --isize 38 --idist 14 --nanim 3 --nofont --config /usr/local/etc/wbar.cfg) &
 fi
 
-# Autostart Symbian Notes and Calculator apps
-if [ -x /usr/bin/symbian-notes ]; then
-    (sleep 2 && /usr/bin/symbian-notes >/tmp/notes.log 2>&1) &
+# Autostart Standard Desktop Applications & Symbian Notes
+cat <<'NOTE' > /tmp/welcome.txt
+==========================================================
+ Symbian-X86 LOOX OS (Fujitsu LOOX M/G30 Netbook Edition)
+ CPU: Intel Atom N450 (32-bit x86) | 1024x600 TFT Display
+ Base: Tiny Core Linux 15.x | Desktop: Symbian Belle UI
+==========================================================
+ Pre-installed Standard Applications:
+  * Web Browser: Dillo (Fast, lightweight web browser)
+  * Text Editor: Leafpad (GTK2 text editor)
+  * Image Viewer: GPicView (Fast image viewer)
+  * PDF Reader: FlaxPDF (Lightweight PDF viewer)
+  * Task Manager: LXTask (Resource and task monitor)
+  * Terminal: LXTerminal (Lightweight tabbed terminal)
+  * System Config: LXAppearance & LXRandr
+  * Symbian Apps: Notes, Calculator, File Browser (C:, D:, Z:)
+==========================================================
+NOTE
+cp /tmp/welcome.txt /etc/skel/Welcome.txt 2>/dev/null || true
+cp /tmp/welcome.txt /home/tc/Welcome.txt 2>/dev/null || true
+
+if [ -x /usr/local/bin/leafpad ]; then
+    (sleep 2 && /usr/local/bin/leafpad /tmp/welcome.txt >/tmp/leafpad.log 2>&1) &
+elif [ -x /usr/bin/leafpad ]; then
+    (sleep 2 && /usr/bin/leafpad /tmp/welcome.txt >/tmp/leafpad.log 2>&1) &
 fi
-if [ -x /usr/bin/symbian-calc ]; then
-    (sleep 3 && /usr/bin/symbian-calc >/tmp/calc.log 2>&1) &
+
+if [ -x /usr/local/bin/lxtask ]; then
+    (sleep 3 && /usr/local/bin/lxtask >/tmp/lxtask.log 2>&1) &
+elif [ -x /usr/bin/lxtask ]; then
+    (sleep 3 && /usr/bin/lxtask >/tmp/lxtask.log 2>&1) &
+fi
+
+if [ -x /usr/bin/symbian-notes ]; then
+    (sleep 4 && /usr/bin/symbian-notes >/tmp/notes.log 2>&1) &
 fi
 
 [ -d "/usr/local/etc/X.d" ] && find "/usr/local/etc/X.d" -type f -o -type l | sort | while read F; do . "$F"; done

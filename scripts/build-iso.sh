@@ -30,6 +30,14 @@ cp "$OUTPUT_DIR/boot/core.gz" "$ISO_STAGING/boot/"
 echo "[2/4] Setting up ISOLINUX bootloader..."
 cp "$BASE_DIR/boot/isolinux"/* "$ISO_STAGING/boot/isolinux/" 2>/dev/null || true
 
+# Stage regular TCZ application packages
+if [ -d "$BASE_DIR/kernel/tinycore/tcz_apps" ]; then
+    echo "[2.5/4] Staging regular TCZ application packages into ISO..."
+    mkdir -p "$ISO_STAGING/cde/optional"
+    [ -f "$BASE_DIR/kernel/tinycore/tcz_apps/onboot.lst" ] && cp "$BASE_DIR/kernel/tinycore/tcz_apps/onboot.lst" "$ISO_STAGING/cde/onboot.lst"
+    cp -r "$BASE_DIR/kernel/tinycore/tcz_apps"/* "$ISO_STAGING/cde/optional/" 2>/dev/null || true
+fi
+
 cat <<'EOF' > "$ISO_STAGING/boot/isolinux/isolinux.cfg"
 SERIAL 0 115200
 UI menu.c32

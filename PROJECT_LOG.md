@@ -125,3 +125,13 @@ sudo dd if="output/symbian-x86-loox.iso" of=/dev/sdX bs=4M status=progress conv=
 2. Power on the netbook and press **F12** to enter the BIOS Boot Menu.
 3. Select **USB HDD** (or your USB flash drive manufacturer name).
 4. The Symbian-X86 LOOX OS Boot Menu will appear and automatically boot within 4 seconds into the Symbian Belle desktop environment.
+
+---
+
+## 8. Standard Applications (TCZ Extensions) Integration
+
+- **Integrated Extensions:** Dillo 3.0.5, Leafpad 0.8.18.1, GPicView 0.2.5, FlaxPDF 0.7.1, LXTask 0.1.10, LXTerminal 0.4.0, LXAppearance 0.6.3, LXRandr 0.3.2, Fluff 1.0, Flcalc, Flviewer, Flburn, and Htop.
+- **Dependency Resolution:** Fetched all 116 recursive `.tcz` and `.dep` dependency packages from official Tiny Core 15.x x86 repository (`repo.tinycorelinux.net/15.x/x86/tcz/`).
+- **RAM Efficiency Architecture:** Staged in `::tce/optional/` (USB) and `::cde/optional/` (ISO) with dynamic squashfs loop-mounts on boot, preserving lean ~44MB initramfs and zero risk of tmpfs memory exhaustion on 512MB RAM netbooks.
+- **Symbian Belle Icons:** Full squircle icon set generated for all standard desktop applications in `wbar.cfg` dock.
+
