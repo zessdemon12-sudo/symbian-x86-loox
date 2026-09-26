@@ -100,7 +100,7 @@ ln -sf /usr/local/bin/python3.9 "$STAGING/usr/bin/python"
 ln -sf /usr/local/bin/python3.9 "$STAGING/usr/local/bin/python3"
 ln -sf /usr/local/bin/python3.9 "$STAGING/usr/local/bin/python"
 [ -f "$STAGING/usr/local/bin/openbox" ] && ln -sf /usr/local/bin/openbox "$STAGING/usr/bin/openbox"
-for app in dillo leafpad gpicview flaxpdf lxtask htop lxterminal lxappearance lxrandr fluff flcalc flviewer flburn aterm network ezremaster wifi.sh; do
+for app in dillo leafpad gpicview flaxpdf lxtask htop lxterminal lxappearance lxrandr fluff flcalc flviewer flburn aterm network ezremaster wifi.sh wifi-manager wifi-connect wifi-monitor; do
     [ -f "$STAGING/usr/local/bin/$app" ] && ln -sf "/usr/local/bin/$app" "$STAGING/usr/bin/$app" 2>/dev/null || true
 done
 [ -f "$STAGING/usr/local/sbin/ndiswrapper" ] && ln -sf /usr/local/sbin/ndiswrapper "$STAGING/usr/bin/ndiswrapper" 2>/dev/null || true
@@ -338,7 +338,30 @@ Terminal=false
 Categories=Network;Settings;
 EOF
 
+cat <<EOF > "$STAGING/usr/share/applications/wifi-wizard.desktop"
+[Desktop Entry]
+Type=Application
+Name=Wi-Fi Wizard (wifi.sh)
+Comment=Interactive Wi-Fi Connection Tool
+Exec=lxterminal -e "sudo wifi.sh"
+Icon=/usr/share/icons/Symbian-Belle/apps/wifi.png
+Terminal=false
+Categories=Network;
+EOF
+
+cat <<EOF > "$STAGING/usr/share/applications/wifi-manager.desktop"
+[Desktop Entry]
+Type=Application
+Name=Wi-Fi Manager (Auto)
+Comment=Minimalistic Wi-Fi Scanner and Auto-Connect
+Exec=lxterminal -e "sudo wifi-connect"
+Icon=/usr/share/icons/Symbian-Belle/apps/wifi.png
+Terminal=false
+Categories=Network;
+EOF
+
 cp "$STAGING/usr/share/applications/symbian-"*.desktop "$STAGING/etc/skel/Desktop/" 2>/dev/null || true
+cp "$STAGING/usr/share/applications/wifi-"*.desktop "$STAGING/etc/skel/Desktop/" 2>/dev/null || true
 
 # 7. Hardware, Audio & Netbook Power Optimizations
 echo "[7/9] Configuring Fujitsu LOOX M/G30 Netbook hardware..."
@@ -481,6 +504,10 @@ t: Package Manager
 i: /usr/share/icons/Symbian-Belle/apps/sysmanager.png
 c: symbian-installer
 t: Install to HDD
+
+i: /usr/share/icons/Symbian-Belle/apps/wifi.png
+c: wifi.sh
+t: Wi-Fi Wizard
 
 i: /usr/share/icons/Symbian-Belle/apps/network.png
 c: symbian-network

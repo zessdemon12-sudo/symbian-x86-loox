@@ -12,6 +12,7 @@ import os
 import sys
 import subprocess
 import re
+import shutil
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 
@@ -207,8 +208,11 @@ class NetworkManagerApp(tk.Tk):
         btn_scan = tk.Button(ctrl_bar, text="🔍 Scan Networks", font=FONT_BOLD, bg=ACCENT_BLUE, fg="#ffffff", command=self.scan_wifi, bd=0, padx=12)
         btn_scan.pack(side="left", padx=8)
         
-        btn_fltk_wifi = tk.Button(ctrl_bar, text="📶 Launch Core WiFi", font=FONT_REGULAR, bg=BG_PANEL, fg=FG_LIGHT, command=self.launch_tc_wifi, bd=0, padx=8)
-        btn_fltk_wifi.pack(side="right")
+        btn_fltk_wifi = tk.Button(ctrl_bar, text="📶 WiFi Wizard", font=FONT_REGULAR, bg=BG_PANEL, fg=FG_LIGHT, command=self.launch_tc_wifi, bd=0, padx=8)
+        btn_fltk_wifi.pack(side="right", padx=(4, 0))
+
+        btn_wm = tk.Button(ctrl_bar, text="⚡ wifi-manager", font=FONT_REGULAR, bg=BG_PANEL, fg=FG_LIGHT, command=self.launch_wifi_manager, bd=0, padx=8)
+        btn_wm.pack(side="right")
         
         # Treeview for Networks
         columns = ("ssid", "signal", "security")
@@ -317,10 +321,18 @@ class NetworkManagerApp(tk.Tk):
             self.refresh_all()
 
     def launch_tc_wifi(self):
-        if os.path.exists("/usr/local/bin/wifi.sh"):
-            subprocess.Popen(["/usr/local/bin/lxterminal", "-e", "sudo /usr/local/bin/wifi.sh"])
+        term = shutil.which("lxterminal") or shutil.which("aterm") or "/usr/local/bin/lxterminal"
+        if os.path.exists("/usr/local/bin/wifi.sh") or os.path.exists("/usr/bin/wifi.sh"):
+            subprocess.Popen([term, "-e", "sudo wifi.sh"])
         else:
-            messagebox.showinfo("Info", "wifi.sh script is loaded with wifi.tcz.")
+            messagebox.showinfo("Info", "wifi.sh script is provided by wifi.tcz.")
+
+    def launch_wifi_manager(self):
+        term = shutil.which("lxterminal") or shutil.which("aterm") or "/usr/local/bin/lxterminal"
+        if os.path.exists("/usr/local/bin/wifi-connect") or os.path.exists("/usr/bin/wifi-connect"):
+            subprocess.Popen([term, "-e", "sudo wifi-connect"])
+        else:
+            messagebox.showinfo("Info", "wifi-connect is provided by wifi-manager.tcz.")
 
     # ---------------------------------------------------------
     # 3. Diagnostics Tab

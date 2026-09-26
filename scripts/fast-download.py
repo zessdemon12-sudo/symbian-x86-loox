@@ -56,6 +56,12 @@ PACKAGES = [
     
     # Ndiswrapper
     ("ndiswrapper.tcz", REPO_10),
+
+    # Wi-Fi Manager Suite
+    ("wifi-manager.tcz", REPO_15),
+    ("iproute2.tcz", REPO_15),
+    ("db.tcz", REPO_15),
+    ("eiwd.tcz", REPO_15),
 ]
 
 def download_file(item):

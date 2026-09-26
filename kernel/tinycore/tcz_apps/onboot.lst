@@ -13,6 +13,10 @@ flviewer.tcz
 flburn.tcz
 kmaps.tcz
 wifi.tcz
+wifi-manager.tcz
+iproute2.tcz
+db.tcz
+eiwd.tcz
 wireless-6.6.8-tinycore.tcz
 wireless_tools.tcz
 wpa_supplicant-dbus.tcz
