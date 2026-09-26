@@ -191,7 +191,16 @@ class CenRep:
         self.uid = uid
         if base_dir is None:
             base_dir = os.environ.get("SYMBIAN_CENREP_DIR", "/tmp/symbian_cenrep")
-        os.makedirs(base_dir, exist_ok=True)
+        try:
+            os.makedirs(base_dir, exist_ok=True)
+        except OSError:
+            base_dir = os.path.expanduser("~/.symbian/cenrep")
+            try:
+                os.makedirs(base_dir, exist_ok=True)
+            except OSError:
+                base_dir = "/tmp/symbian_cenrep"
+                os.makedirs(base_dir, exist_ok=True)
+        self.base_dir = base_dir
         self.filepath = os.path.join(base_dir, f"rep_0x{uid:08X}.json")
         self.data = {}
         self.load()
@@ -205,8 +214,19 @@ class CenRep:
                 self.data = {}
 
     def save(self):
-        with open(self.filepath, "w", encoding="utf-8") as f:
-            json.dump(self.data, f, indent=2)
+        try:
+            with open(self.filepath, "w", encoding="utf-8") as f:
+                json.dump(self.data, f, indent=2)
+        except OSError:
+            # Fallback to user home directory or tmp if current path unwriteable
+            fallback_dir = os.path.expanduser("~/.symbian/cenrep")
+            try:
+                os.makedirs(fallback_dir, exist_ok=True)
+                self.filepath = os.path.join(fallback_dir, f"rep_0x{self.uid:08X}.json")
+                with open(self.filepath, "w", encoding="utf-8") as f:
+                    json.dump(self.data, f, indent=2)
+            except Exception:
+                pass
 
     def get(self, key, default=None):
         return self.data.get(str(key), default)

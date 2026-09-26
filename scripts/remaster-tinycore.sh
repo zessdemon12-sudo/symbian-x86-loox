@@ -113,7 +113,7 @@ ln -sf /usr/local/etc/fonts/fonts.conf "$STAGING/etc/fonts/fonts.conf" 2>/dev/nu
 
 # 5. Integrate Symbian Compatibility Layer
 echo "[5/9] Installing Symbian Framework & SIS Package Manager..."
-mkdir -p "$STAGING/opt/symbian/lib" "$STAGING/opt/symbian/bin" "$STAGING/opt/symbian/packages" "$STAGING/opt/symbian/rom"
+mkdir -p "$STAGING/opt/symbian/lib" "$STAGING/opt/symbian/bin" "$STAGING/opt/symbian/packages" "$STAGING/opt/symbian/rom" "$STAGING/opt/symbian/system/data/cenrep" "$STAGING/opt/symbian/sys_drive/sys/bin"
 cp -r "$BASE_DIR/symbian"/* "$STAGING/opt/symbian/" 2>/dev/null || true
 touch "$STAGING/opt/symbian/__init__.py" "$STAGING/opt/symbian/package/__init__.py" "$STAGING/opt/symbian/api/__init__.py"
 
@@ -137,6 +137,7 @@ chmod +x "$STAGING/usr/bin/symbian-notes" "$STAGING/usr/bin/symbian-calc" "$STAG
 
 # Copy sample packages
 cp -r "$BASE_DIR/packages"/* "$STAGING/opt/symbian/packages/" 2>/dev/null || true
+chmod -R 777 "$STAGING/opt/symbian" 2>/dev/null || true
 
 # 6. Install Desktop Environments (LXQt & Openbox) and Symbian Belle Theme
 echo "[6/9] Installing LXQt, Openbox, and Symbian Belle Theme..."
@@ -426,13 +427,19 @@ cat <<'EOF' > "$STAGING/opt/bootsync.sh"
 # System startup for Symbian-X86 LOOX OS (Tiny Core Linux Base)
 /usr/bin/sethostname loox-symbian
 
-# Initialize Symbian Drives
-mkdir -p /home/tc /media /opt/symbian/rom /opt/symbian/sys_drive/sys/bin
+# Initialize Symbian Drives & Permissions
+mkdir -p /home/tc /media /opt/symbian/rom /opt/symbian/sys_drive/sys/bin /opt/symbian/system/data/cenrep
+chmod -R 777 /opt/symbian 2>/dev/null || true
 cp -a /etc/skel/. /home/tc/ 2>/dev/null || true
 chown -R tc:staff /home/tc 2>/dev/null || true
 ln -sfn /home/tc /C: 2>/dev/null || true
 ln -sfn /media /D: 2>/dev/null || true
 ln -sfn /opt/symbian/rom /Z: 2>/dev/null || true
+
+# Ensure all TCZ applications in /usr/local/bin and /usr/local/sbin are accessible in /usr/bin
+for bin in /usr/local/bin/* /usr/local/sbin/*; do
+    [ -x "$bin" ] && ln -sf "$bin" "/usr/bin/$(basename "$bin")" 2>/dev/null || true
+done
 
 # Dynamic library cache
 /sbin/ldconfig 2>/dev/null || true

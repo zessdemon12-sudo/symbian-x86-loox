@@ -19,7 +19,12 @@ class SymbianAppManager:
         self.root.geometry("580x440")
         self.root.configure(bg="#F4F6F8")
 
-        self.pkg_mgr = SymbianPackageManager()
+        try:
+            self.pkg_mgr = SymbianPackageManager()
+        except Exception as e:
+            print(f"[APPMANAGER] Warning initializing SymbianPackageManager: {e}")
+            self.pkg_mgr = None
+
         self._setup_ui()
         self.refresh_apps()
         self.refresh_tasks()
@@ -109,21 +114,51 @@ class SymbianAppManager:
 
     def refresh_apps(self):
         self.tree_apps.delete(*self.tree_apps.get_children())
-        self.pkg_mgr.registry.load()
-        for uid, rec in self.pkg_mgr.registry.data.items():
-            self.tree_apps.insert("", tk.END, values=(rec.get("name"), rec.get("version"), uid, rec.get("vendor")))
+        if not self.pkg_mgr or not hasattr(self.pkg_mgr, "registry") or not self.pkg_mgr.registry:
+            return
+        try:
+            self.pkg_mgr.registry.load()
+            for uid, rec in self.pkg_mgr.registry.data.items():
+                self.tree_apps.insert("", tk.END, values=(rec.get("name"), rec.get("version"), uid, rec.get("vendor")))
+        except Exception:
+            pass
 
     def launch_selected_app(self):
         sel = self.tree_apps.selection()
-        if not sel: return
+        if not sel or not self.pkg_mgr: return
         uid = self.tree_apps.item(sel[0])["values"][2]
         rec = self.pkg_mgr.registry.get(uid)
-        if rec and rec.get("desktop_file"):
-            os.system(f"gtk-launch {os.path.basename(rec['desktop_file'])} &")
+        if not rec: return
+
+        # Check binary path first
+        if rec.get("binary") and os.path.exists(rec["binary"]):
+            subprocess.Popen([rec["binary"]])
+            return
+
+        # Check desktop file
+        desk = rec.get("desktop_file")
+        if desk and os.path.exists(desk):
+            cmd = None
+            try:
+                with open(desk, "r") as f:
+                    for line in f:
+                        if line.startswith("Exec="):
+                            cmd = line.split("=", 1)[1].strip()
+                            break
+            except Exception:
+                pass
+            if cmd:
+                subprocess.Popen(cmd, shell=True)
+                return
+
+        # Fallback to sys_root/sys/bin
+        bin_path = os.path.join(self.pkg_mgr.sys_root, "sys", "bin", f"{rec.get('name', '').lower()}.bin")
+        if os.path.exists(bin_path):
+            subprocess.Popen([bin_path])
 
     def uninstall_selected_app(self):
         sel = self.tree_apps.selection()
-        if not sel: return
+        if not sel or not self.pkg_mgr: return
         uid = self.tree_apps.item(sel[0])["values"][2]
         name = self.tree_apps.item(sel[0])["values"][0]
         if messagebox.askyesno("Uninstall", f"Are you sure you want to uninstall {name}?"):
@@ -133,14 +168,27 @@ class SymbianAppManager:
     def refresh_tasks(self):
         self.tree_tasks.delete(*self.tree_tasks.get_children())
         try:
-            out = subprocess.check_output(["ps", "-eo", "pid,rss,comm", "--sort=-rss"], text=True)
-            lines = out.strip().split("\n")[1:25] # top 25 processes
-            for line in lines:
-                parts = line.split(None, 2)
-                if len(parts) == 3:
-                    pid, rss, comm = parts
-                    mem_mb = f"{int(rss)/1024:.1f} MB"
-                    self.tree_tasks.insert("", tk.END, values=(pid, comm, mem_mb))
+            procs = []
+            for entry in os.listdir("/proc"):
+                if entry.isdigit():
+                    pid = entry
+                    try:
+                        comm = None
+                        if os.path.exists(f"/proc/{pid}/comm"):
+                            with open(f"/proc/{pid}/comm", "r") as cp:
+                                comm = cp.read().strip()
+                        with open(f"/proc/{pid}/stat", "r") as fp:
+                            stat = fp.read().split()
+                            if not comm:
+                                comm = stat[1].strip("()")
+                            rss = int(stat[23]) * 4096
+                            procs.append((pid, comm, rss))
+                    except Exception:
+                        pass
+            procs.sort(key=lambda x: x[2], reverse=True)
+            for pid, comm, rss in procs[:25]:
+                mem_mb = f"{rss / (1024*1024):.1f} MB"
+                self.tree_tasks.insert("", tk.END, values=(pid, comm, mem_mb))
         except Exception:
             pass
 

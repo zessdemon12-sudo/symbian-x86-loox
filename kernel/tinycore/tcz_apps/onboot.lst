@@ -22,6 +22,10 @@ wireless_tools.tcz
 wpa_supplicant-dbus.tcz
 iw.tcz
 pci-utils.tcz
+tar.tcz
+gzip.tcz
+advcomp.tcz
+mkisofs-tools.tcz
 ezremaster.tcz
 ndiswrapper.tcz
 firmware-atheros.tcz

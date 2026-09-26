@@ -24,6 +24,8 @@ COREPLUS_PACKAGES=(
     "kmaps.tcz"
 
     # Remastering Tools
+    "tar.tcz"
+    "gzip.tcz"
     "ezremaster.tcz"
     "advcomp.tcz"
     "mkisofs-tools.tcz"

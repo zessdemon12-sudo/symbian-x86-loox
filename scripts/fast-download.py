@@ -12,6 +12,8 @@ PACKAGES = [
     ("kmaps.tcz", REPO_15),
     
     # Remaster Tools
+    ("tar.tcz", REPO_15),
+    ("gzip.tcz", REPO_15),
     ("ezremaster.tcz", REPO_15),
     ("advcomp.tcz", REPO_15),
     ("mkisofs-tools.tcz", REPO_15),

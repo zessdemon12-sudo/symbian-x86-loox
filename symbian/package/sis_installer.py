@@ -71,7 +71,8 @@ class SymbianPackageManager:
             "capabilities": pkg.capability_list(),
             "target_type": pkg.target_type,
             "installed_files": installed_files,
-            "desktop_file": desktop_entry
+            "desktop_file": desktop_entry,
+            "binary": app_binary_path
         }
         self.registry.set(uid_str, record)
         print(f"[SYMBIAN-PKG] Successfully installed {pkg.app_name} ({uid_str})!\n")
