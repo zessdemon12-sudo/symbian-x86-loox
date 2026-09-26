@@ -135,3 +135,15 @@ sudo dd if="output/symbian-x86-loox.iso" of=/dev/sdX bs=4M status=progress conv=
 - **RAM Efficiency Architecture:** Staged in `::tce/optional/` (USB) and `::cde/optional/` (ISO) with dynamic squashfs loop-mounts on boot, preserving lean ~44MB initramfs and zero risk of tmpfs memory exhaustion on 512MB RAM netbooks.
 - **Symbian Belle Icons:** Full squircle icon set generated for all standard desktop applications in `wbar.cfg` dock.
 
+### 8.1 Resolution for Application Launch & Loop Device Exhaustion:
+- **Root Cause Identified:**
+  1. Only 8 static loop nodes (`/dev/loop0`..`/dev/loop7`) existed in base rootfs without `/dev/loop-control`. Once 8 base extensions loaded, all regular desktop applications failed with `mount: can't setup loop device: Inappropriate ioctl for device`.
+  2. Host `depmod` in remaster script had overwritten `modules.dep` to 0 bytes because host depmod does not index `.ko.gz` modules, preventing `loop.ko` from loading.
+- **Applied Fixes:**
+  1. Removed destructive host `depmod` call, preserving upstream `modules.dep` and `modules.alias`.
+  2. Pre-created `/dev/loop-control` (character major 10, minor 237) and 256 loop block devices (`/dev/loop0`..`/dev/loop255`).
+  3. Patched `tc-config` to run `modprobe loop max_loop=256` and guarantee loop nodes at boot.
+  4. Added `loop.max_loop=256` to Syslinux and ISOLINUX kernel command lines.
+- **Verification:** Verified in QEMU: `dillo`, `leafpad`, `gpicview`, `lxtask`, and `lxterminal` install and execute cleanly.
+
+

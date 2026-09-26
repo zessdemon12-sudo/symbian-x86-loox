@@ -58,36 +58,36 @@ LABEL live
   MENU LABEL ^1. Symbian-X86 LOOX OS (Tiny Core RAM Desktop - Auto KMS)
   LINUX /boot/vmlinuz
   INITRD /boot/core.gz
-  APPEND loglevel=3 quiet waitusb=5 cde console=ttyS0,115200 console=tty0
+  APPEND loglevel=3 quiet waitusb=5 loop.max_loop=256 console=ttyS0,115200 console=tty0
 
 LABEL vesa
   MENU LABEL ^2. Symbian-X86 LOOX OS (Safe Graphics - nomodeset/VESA)
   LINUX /boot/vmlinuz
   INITRD /boot/core.gz
-  APPEND loglevel=3 quiet waitusb=5 xvesa=1024x600x16 nomodeset console=ttyS0,115200 console=tty0
+  APPEND loglevel=3 quiet waitusb=5 loop.max_loop=256 xvesa=1024x600x16 nomodeset console=ttyS0,115200 console=tty0
 
 LABEL directroot
   MENU LABEL ^3. Symbian-X86 LOOX OS (Direct Root /vmlinuz)
   LINUX /vmlinuz
   INITRD /core.gz
-  APPEND loglevel=3 quiet waitusb=5 console=ttyS0,115200 console=tty0
+  APPEND loglevel=3 quiet waitusb=5 loop.max_loop=256 console=ttyS0,115200 console=tty0
 
 LABEL kernelmod
   MENU LABEL ^4. Symbian-X86 LOOX OS (KERNEL Direct Mode)
   KERNEL /boot/vmlinuz
-  APPEND initrd=/boot/core.gz loglevel=3 quiet waitusb=5 console=ttyS0,115200 console=tty0
+  APPEND initrd=/boot/core.gz loglevel=3 quiet waitusb=5 loop.max_loop=256 console=ttyS0,115200 console=tty0
 
 LABEL install
   MENU LABEL ^5. Install Symbian-X86 to Internal HDD/SSD
   LINUX /boot/vmlinuz
   INITRD /boot/core.gz
-  APPEND loglevel=3 quiet waitusb=5 symbian_installer=1 console=ttyS0,115200 console=tty0
+  APPEND loglevel=3 quiet waitusb=5 loop.max_loop=256 symbian_installer=1 console=ttyS0,115200 console=tty0
 
 LABEL debug
   MENU LABEL ^6. Symbian-X86 LOOX OS (Verbose Console & Debug Shell)
   LINUX /boot/vmlinuz
   INITRD /boot/core.gz
-  APPEND loglevel=7 debug waitusb=5 showapps text console=ttyS0,115200 console=tty0
+  APPEND loglevel=7 debug waitusb=5 loop.max_loop=256 showapps text console=ttyS0,115200 console=tty0
 EOF
 
 # Copy syslinux.cfg to all standard search locations

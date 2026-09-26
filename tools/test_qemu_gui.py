@@ -24,11 +24,12 @@ if os.path.exists(SERIAL_LOG):
 qemu_cmd = [
     "qemu-system-i386",
     "-name", "Symbian-X86 LOOX OS",
+    "-enable-kvm",
     "-m", "512M",
     "-smp", "2",
     "-kernel", os.path.join(BASE_DIR, "output", "boot", "vmlinuz"),
     "-initrd", os.path.join(BASE_DIR, "output", "boot", "core.gz"),
-    "-append", "loglevel=3 quiet waitusb=5 cde console=ttyS0,115200 console=tty0",
+    "-append", "loglevel=3 quiet waitusb=5 loop.max_loop=256 console=ttyS0,115200 console=tty0",
     "-drive", f"file={USB_IMG},format=raw",
     "-vga", "std",
     "-display", "none",
@@ -48,8 +49,8 @@ try:
     if not os.path.exists(MONITOR_SOCK):
         raise RuntimeError("QEMU monitor socket not created!")
 
-    print("[TEST] QEMU started. Waiting 35 seconds for kernel decompression & desktop init...")
-    time.sleep(35)
+    print("[TEST] QEMU started with KVM. Waiting 18 seconds for X desktop and applications...")
+    time.sleep(18)
 
     s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     s.connect(MONITOR_SOCK)
@@ -68,7 +69,9 @@ try:
         os.makedirs(os.path.dirname(DOC_PNG), exist_ok=True)
         img.save(SCREEN_PNG, "PNG")
         img.save(DOC_PNG, "PNG")
-        print(f"[TEST] Saved screenshot to {SCREEN_PNG} and {DOC_PNG} ({img.size[0]}x{img.size[1]})")
+        apps_png = os.path.join(BASE_DIR, "docs", "screenshots", "screenshot_apps.png")
+        img.save(apps_png, "PNG")
+        print(f"[TEST] Saved screenshot to {SCREEN_PNG}, {DOC_PNG}, and {apps_png} ({img.size[0]}x{img.size[1]})")
     else:
         print("[ERROR] Screendump file was not created!")
 

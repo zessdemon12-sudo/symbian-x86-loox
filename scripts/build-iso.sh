@@ -55,25 +55,25 @@ LABEL live
   MENU LABEL ^1. Symbian-X86 LOOX OS (Tiny Core RAM Desktop)
   KERNEL /boot/vmlinuz
   INITRD /boot/core.gz
-  APPEND loglevel=3 quiet waitusb=5 cde console=ttyS0,115200 console=tty0
+  APPEND loglevel=3 quiet waitusb=5 loop.max_loop=256 cde console=ttyS0,115200 console=tty0
 
 LABEL vesa
   MENU LABEL ^2. Symbian-X86 LOOX OS (Safe Graphics - nomodeset/VESA)
   KERNEL /boot/vmlinuz
   INITRD /boot/core.gz
-  APPEND loglevel=3 quiet waitusb=5 xvesa=1024x600x16 nomodeset console=ttyS0,115200 console=tty0
+  APPEND loglevel=3 quiet waitusb=5 loop.max_loop=256 xvesa=1024x600x16 nomodeset console=ttyS0,115200 console=tty0
 
 LABEL install
   MENU LABEL ^3. Install Symbian-X86 to Internal HDD/SSD
   KERNEL /boot/vmlinuz
   INITRD /boot/core.gz
-  APPEND loglevel=3 quiet waitusb=5 symbian_installer=1 console=ttyS0,115200 console=tty0
+  APPEND loglevel=3 quiet waitusb=5 loop.max_loop=256 symbian_installer=1 console=ttyS0,115200 console=tty0
 
 LABEL debug
   MENU LABEL ^4. Symbian-X86 LOOX OS (Verbose Console & Debug Shell)
   KERNEL /boot/vmlinuz
   INITRD /boot/core.gz
-  APPEND loglevel=7 debug waitusb=5 showapps text console=tty0 console=ttyS0,115200
+  APPEND loglevel=7 debug waitusb=5 loop.max_loop=256 showapps text console=tty0 console=ttyS0,115200
 EOF
 
 # 3. Generate ISO with genisoimage

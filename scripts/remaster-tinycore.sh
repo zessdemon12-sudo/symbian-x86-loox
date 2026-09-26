@@ -41,6 +41,19 @@ cd "$STAGING"
 fakeroot sh -c "zcat '$KERNEL_DIR/core.gz' | cpio -idmu" 2>/dev/null
 cd "$SCRIPT_DIR"
 
+# Create /dev/loop-control and 256 loop block device nodes
+echo "[1.5/9] Creating 256 loop device nodes and loop-control..."
+fakeroot sh -c "
+    mknod -m 660 '$STAGING/dev/loop-control' c 10 237 2>/dev/null || true
+    for i in \$(seq 0 255); do
+        mknod -m 660 '$STAGING/dev/loop\$i' b 7 \$i 2>/dev/null || true
+    done
+    chgrp 50 '$STAGING/dev/loop'* 2>/dev/null || true
+"
+
+# Patch tc-config to load loop with max_loop=256 and guarantee loop nodes at boot
+sed -i 's/modprobe loop 2>\/dev\/null/modprobe loop max_loop=256 2>\/dev\/null\n[ -c \/dev\/loop-control ] || mknod -m 660 \/dev\/loop-control c 10 237 2>\/dev\/null\nfor i in \$(seq 0 255); do [ -b \/dev\/loop\$i ] || mknod -m 660 \/dev\/loop\$i b 7 \$i 2>\/dev\/null; done\nchgrp staff \/dev\/loop* 2>\/dev\/null\nchmod 660 \/dev\/loop* 2>\/dev\/null/' "$STAGING/etc/init.d/tc-config"
+
 # 2. Unpack Storage & Hardware Kernel Modules
 if [ -f "$KERNEL_DIR/modules.gz" ]; then
     echo "[2/9] Integrating storage and filesystem kernel modules..."
@@ -536,9 +549,6 @@ case "$TERMTYPE" in
 esac
 EOF
 chmod 644 "$STAGING/etc/skel/.profile"
-
-# Update depmod for modules
-depmod -b "$STAGING" 6.6.8-tinycore 2>/dev/null || true
 
 # 9. Pack Remastered core.gz
 echo "[9/9] Repacking remastered core.gz archive..."
