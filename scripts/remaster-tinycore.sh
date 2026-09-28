@@ -139,6 +139,31 @@ chmod +x "$STAGING/usr/bin/symbian-notes" "$STAGING/usr/bin/symbian-calc" "$STAG
 cp -r "$BASE_DIR/packages"/* "$STAGING/opt/symbian/packages/" 2>/dev/null || true
 chmod -R 777 "$STAGING/opt/symbian" 2>/dev/null || true
 
+# Pre-compile Python apps with -OO (strips docstrings + assertions = faster startup + smaller .pyc)
+echo "[5.5/9] Pre-compiling Symbian Python apps with -OO for faster startup..."
+if command -v python3 >/dev/null 2>&1; then
+    python3 -OO -m compileall -q "$STAGING/opt/symbian/" 2>/dev/null || true
+    python3 -OO -m compileall -q "$STAGING/usr/bin/" 2>/dev/null || true
+fi
+
+# Optimize Python shebangs to use -OO flag for all Symbian apps
+for pyapp in "$STAGING/usr/bin/symbian-"*; do
+    if [ -f "$pyapp" ] && head -1 "$pyapp" | grep -q python; then
+        sed -i '1s|#!/usr/bin/env python3$|#!/usr/bin/env python3 -OO|' "$pyapp" 2>/dev/null || true
+        sed -i '1s|#!/usr/bin/python3$|#!/usr/bin/env python3 -OO|' "$pyapp" 2>/dev/null || true
+    fi
+done
+
+# Strip debug symbols from ELF binaries in staging to shrink core.gz
+echo "[5.6/9] Stripping debug symbols from binaries to reduce core.gz size..."
+if command -v strip >/dev/null 2>&1; then
+    find "$STAGING/usr/local/bin" "$STAGING/usr/bin" "$STAGING/usr/local/lib" "$STAGING/lib" \
+        -type f 2>/dev/null | while read -r f; do
+        file "$f" 2>/dev/null | grep -qE 'ELF.*(executable|shared object)' && \
+            strip --strip-unneeded "$f" 2>/dev/null || true
+    done
+fi
+
 # 6. Install Desktop Environments (LXQt & Openbox) and Symbian Belle Theme
 echo "[6/9] Installing LXQt, Openbox, and Symbian Belle Theme..."
 mkdir -p "$STAGING/etc/xdg/lxqt" "$STAGING/etc/xdg/pcmanfm-qt/lxqt" "$STAGING/etc/xdg/openbox"
@@ -452,11 +477,31 @@ chmod 755 "$STAGING/opt/bootsync.sh"
 cat <<'EOF' > "$STAGING/opt/bootlocal.sh"
 #!/bin/sh
 # Fujitsu FMV-BIBLO LOOX M/G30 Hardware & Power Optimization
+
+# I/O Scheduler: 'deadline' is best for SSD/USB flash storage on Atom N450
+# (mq-deadline for multi-queue, deadline for single-queue kernels)
+for dev in /sys/block/sd* /sys/block/mmcblk*; do
+    if [ -f "$dev/queue/scheduler" ]; then
+        echo mq-deadline > "$dev/queue/scheduler" 2>/dev/null || \
+        echo deadline    > "$dev/queue/scheduler" 2>/dev/null || true
+    fi
+    # Increase read-ahead for USB/flash to reduce seek latency
+    [ -f "$dev/queue/read_ahead_kb" ] && echo 256 > "$dev/queue/read_ahead_kb" 2>/dev/null || true
+done
+
+# Power & memory tuning (zram, cpu governor, etc.)
 if [ -x /opt/symbian/bin/loox-power-opt.sh ]; then
     /opt/symbian/bin/loox-power-opt.sh 2>/dev/null || true
 fi
+
+# Pre-warm Python startup by importing common modules once in background
+# This populates the OS page cache so subsequent app launches are faster
+if command -v python3 >/dev/null 2>&1; then
+    python3 -c "import tkinter, os, sys, json, subprocess, re" >/dev/null 2>&1 &
+fi
 EOF
 chmod 755 "$STAGING/opt/bootlocal.sh"
+
 
 # Default desktop and Xserver
 echo "flwm" > "$STAGING/etc/sysconfig/desktop"
@@ -541,21 +586,13 @@ export LD_LIBRARY_PATH=/usr/local/lib:/opt/symbian/lib:$LD_LIBRARY_PATH
 export DISPLAY=:0.0
 [ -z "$XAUTHORITY" ] && export XAUTHORITY=$HOME/.Xauthority
 
-# Determine best supported VESA resolution
-# Prefer native 1024x600 for Fujitsu LOOX M/G30, fallback to standard VESA 1024x768 or 800x600
-RES="1024x768x32"
-if Xvesa -listmodes 2>&1 | grep -q "1024x600"; then
-    RES="1024x600x32"
-elif Xvesa -listmodes 2>&1 | grep -q "1024x768"; then
-    RES="1024x768x32"
-elif Xvesa -listmodes 2>&1 | grep -q "800x600"; then
-    RES="800x600x32"
-fi
-
-Xvesa -br -screen "$RES" -shadow -2button -mouse /dev/input/mice,5 -nolisten tcp -I -s 0 -dpms >/tmp/xvesa.log 2>&1 &
+# Start X server - prefer 1024x600 native LOOX resolution, fallback to 1024x768
+# Skip Xvesa -listmodes probe (slow) - hardcode LOOX native resolution first
+Xvesa -br -screen 1024x600x32 -shadow -2button -mouse /dev/input/mice,5 -nolisten tcp -I -s 0 -dpms >/tmp/xvesa.log 2>&1 &
 export XPID=$!
 if ! waitforX 2>/dev/null; then
     kill -9 $XPID 2>/dev/null || true
+    # Fallback: 1024x768x16 (standard VESA)
     Xvesa -br -screen 1024x768x16 -shadow -2button -mouse /dev/input/mice,5 -nolisten tcp -I -s 0 -dpms >/tmp/xvesa.log 2>&1 &
     export XPID=$!
     waitforX || ! echo failed in waitforX || exit
@@ -575,12 +612,12 @@ elif [ -x /usr/local/bin/openbox ]; then
     export WM_PID=$!
 fi
 
-# Symbian Belle App Dock
+# Symbian Belle App Dock (no sleep - starts immediately after WM)
 if [ -x /usr/local/bin/wbar ]; then
-    (sleep 1 && wbar --bpress --above-desk --pos bottom --isize 38 --idist 14 --nanim 3 --nofont --config /usr/local/etc/wbar.cfg) &
+    wbar --bpress --above-desk --pos bottom --isize 38 --idist 14 --nanim 3 --nofont --config /usr/local/etc/wbar.cfg &
 fi
 
-# Autostart Standard Desktop Applications & Symbian Notes
+# Autostart welcome note (shorter delay - WM is already up by now)
 cat <<'NOTE' > /tmp/welcome.txt
 ==========================================================
  Symbian-X86 LOOX OS (Fujitsu LOOX M/G30 Netbook Edition)
@@ -601,20 +638,16 @@ NOTE
 cp /tmp/welcome.txt /etc/skel/Welcome.txt 2>/dev/null || true
 cp /tmp/welcome.txt /home/tc/Welcome.txt 2>/dev/null || true
 
+# Open welcome note after 1s (was 2s) - WM + wbar both up by now
 if [ -x /usr/local/bin/leafpad ]; then
-    (sleep 2 && /usr/local/bin/leafpad /tmp/welcome.txt >/tmp/leafpad.log 2>&1) &
+    (sleep 1 && /usr/local/bin/leafpad /tmp/welcome.txt >/tmp/leafpad.log 2>&1) &
 elif [ -x /usr/bin/leafpad ]; then
-    (sleep 2 && /usr/bin/leafpad /tmp/welcome.txt >/tmp/leafpad.log 2>&1) &
+    (sleep 1 && /usr/bin/leafpad /tmp/welcome.txt >/tmp/leafpad.log 2>&1) &
 fi
 
-if [ -x /usr/local/bin/lxtask ]; then
-    (sleep 3 && /usr/local/bin/lxtask >/tmp/lxtask.log 2>&1) &
-elif [ -x /usr/bin/lxtask ]; then
-    (sleep 3 && /usr/bin/lxtask >/tmp/lxtask.log 2>&1) &
-fi
-
+# Autostart Symbian Notes after 2s (was 4s)
 if [ -x /usr/bin/symbian-notes ]; then
-    (sleep 4 && /usr/bin/symbian-notes >/tmp/notes.log 2>&1) &
+    (sleep 2 && /usr/bin/symbian-notes >/tmp/notes.log 2>&1) &
 fi
 
 [ -d "/usr/local/etc/X.d" ] && find "/usr/local/etc/X.d" -type f -o -type l | sort | while read F; do . "$F"; done
@@ -623,6 +656,7 @@ fi
 wait $WM_PID
 EOF
 chmod 755 "$STAGING/etc/skel/.xsession"
+
 
 # Configure .profile to prevent startx hanging on serial console
 cat <<'EOF' > "$STAGING/etc/skel/.profile"
@@ -662,9 +696,28 @@ chmod 644 "$STAGING/etc/skel/.profile"
 
 # 9. Pack Remastered core.gz
 echo "[9/9] Repacking remastered core.gz archive..."
+
+# Remove locale/i18n files for non-essential languages to shrink core.gz
+# Keep: C, en, en_US, en_GB, POSIX
+echo "  [9a] Pruning unused locale data and docs..."
+find "$STAGING/usr/share/locale" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | \
+    grep -Ev '/(C|en|en_US|en_GB|POSIX)$' | xargs rm -rf 2>/dev/null || true
+# Remove man pages and info docs (not useful in live RAM environment)
+rm -rf "$STAGING/usr/share/man" "$STAGING/usr/share/info" "$STAGING/usr/share/doc" 2>/dev/null || true
+# Remove Python test suites (large, unused at runtime)
+find "$STAGING/usr/local/lib" -type d -name 'test' -o -name 'tests' 2>/dev/null | xargs rm -rf 2>/dev/null || true
+find "$STAGING/usr/local/lib" -type d -name '__pycache__' 2>/dev/null | xargs rm -rf 2>/dev/null || true
+# Remove .a static libraries (only .so needed at runtime)
+find "$STAGING/usr/local/lib" -name '*.a' -type f 2>/dev/null | xargs rm -f 2>/dev/null || true
+
 rm -f "$OUTPUT_BOOT/core.gz"
 cd "$STAGING"
-fakeroot sh -c "find . | cpio -o -H newc | gzip -9 > '$OUTPUT_BOOT/core.gz'"
+# Use pigz (parallel gzip) if available for faster builds; fall back to gzip -9
+if command -v pigz >/dev/null 2>&1; then
+    fakeroot sh -c "find . | cpio -o -H newc | pigz -9 > '$OUTPUT_BOOT/core.gz'"
+else
+    fakeroot sh -c "find . | cpio -o -H newc | gzip -9 > '$OUTPUT_BOOT/core.gz'"
+fi
 cd "$SCRIPT_DIR"
 
 # Stage vmlinuz

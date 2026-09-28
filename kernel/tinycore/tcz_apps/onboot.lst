@@ -1,53 +1,67 @@
-dillo.tcz
+# TCZ Load Order - optimized for fastest desktop appearance
+# Rule: load lightweight tools and desktop apps first; heavy firmware last.
+
+# --- Core utilities (needed by everything else) ---
+iproute2.tcz
+pci-utils.tcz
+kmaps.tcz
+
+# --- Desktop Applications (appear on screen fastest) ---
 leafpad.tcz
 gpicview.tcz
-flaxpdf.tcz
-lxtask.tcz
-htop.tcz
 lxterminal.tcz
+lxtask.tcz
 lxappearance.tcz
 lxrandr.tcz
+dillo.tcz
+
+# --- Multimedia/Document Viewers ---
+flaxpdf.tcz
 fluff.tcz
 flcalc.tcz
 flviewer.tcz
 flburn.tcz
-kmaps.tcz
-wifi.tcz
-wifi-manager.tcz
-iproute2.tcz
-db.tcz
-eiwd.tcz
-wireless-6.6.8-tinycore.tcz
-wireless_tools.tcz
-wpa_supplicant-dbus.tcz
-iw.tcz
-pci-utils.tcz
+htop.tcz
+
+# --- Remaster tools (dependency chain: tar -> gzip -> advcomp -> mkisofs -> ezremaster) ---
 tar.tcz
 gzip.tcz
 advcomp.tcz
 mkisofs-tools.tcz
 ezremaster.tcz
+
+# --- Wi-Fi Tools ---
+wifi.tcz
+wifi-manager.tcz
+wireless_tools.tcz
+iw.tcz
+wpa_supplicant-dbus.tcz
+eiwd.tcz
+wireless-6.6.8-tinycore.tcz
 ndiswrapper.tcz
-firmware-atheros.tcz
-firmware-broadcom_bcm43xx.tcz
+
+# --- Firmware (deferred last - only needed after network subsystem is up) ---
+db.tcz
 firmware-intel.tcz
 firmware-intel_e100.tcz
+firmware-iwlwifi.tcz
+firmware-iwl8000.tcz
+firmware-iwl9000.tcz
+firmware-atheros.tcz
+firmware-broadcom_bcm43xx.tcz
 firmware-ipw2100.tcz
 firmware-ipw2200.tcz
 firmware-iwimax.tcz
-firmware-iwl8000.tcz
-firmware-iwl9000.tcz
-firmware-iwlwifi.tcz
 firmware-marvel.tcz
+firmware-ralinkwifi.tcz
+firmware-rtlwifi.tcz
+firmware-rtl_nic.tcz
+firmware-ti-connectivity.tcz
+firmware-zd1211.tcz
+firmware-openfwwf.tcz
 firmware-myri10ge.tcz
 firmware-netxen.tcz
-firmware-openfwwf.tcz
-firmware-ralinkwifi.tcz
-firmware-rtl_nic.tcz
-firmware-rtlwifi.tcz
-firmware-ti-connectivity.tcz
 firmware-ueagle-atm.tcz
 firmware-vxge.tcz
-firmware-zd1211.tcz
 firmware-chelsio.tcz
 firmware-tigon.tcz
