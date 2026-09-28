@@ -423,6 +423,12 @@ VERSION_ID="1.0"
 HOME_URL="https://github.com/symbian-x86/loox"
 EOF
 
+# Pre-create Tiny Core mirror configuration so Apps browser works offline
+# Without this file, Apps browser shows: "Must load mirrors.tcz or have /opt/localmirrors"
+echo "http://repo.tinycorelinux.net/" > "$STAGING/opt/localmirrors"
+echo "http://repo.tinycorelinux.net/" > "$STAGING/opt/tcemirror"
+chmod 644 "$STAGING/opt/localmirrors" "$STAGING/opt/tcemirror"
+
 # 8. Configure Tiny Core System Startup & Symbian Drives
 echo "[8/9] Configuring Tiny Core system startup and Symbian drives..."
 mkdir -p "$STAGING/opt" "$STAGING/etc/sysconfig"
@@ -460,6 +466,11 @@ chown -R tc:staff /home/tc 2>/dev/null || true
 ln -sfn /home/tc /C: 2>/dev/null || true
 ln -sfn /media /D: 2>/dev/null || true
 ln -sfn /opt/symbian/rom /Z: 2>/dev/null || true
+
+# Tiny Core mirror configuration (required for Apps browser & tce-load)
+# Prevents "Must load mirrors.tcz or have /opt/localmirrors" error
+[ -f /opt/localmirrors ] || echo "http://repo.tinycorelinux.net/" > /opt/localmirrors
+[ -f /opt/tcemirror ] || echo "http://repo.tinycorelinux.net/" > /opt/tcemirror
 
 # Ensure all TCZ applications in /usr/local/bin and /usr/local/sbin are accessible in /usr/bin
 for bin in /usr/local/bin/* /usr/local/sbin/*; do
